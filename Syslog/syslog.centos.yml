@@ -1,0 +1,157 @@
+- hosts: "{{ hosts_tmp }}"
+  vars_prompt:
+  - name: "hosts_tmp"
+    prompt: "¿En que servidor se instalara el Syslog?"
+    private: no
+  - name: "IPAddress"
+    prompt: "¿Cual es la direccion IP?"
+    private: no
+    default: 10.192.93.10
+  - name: "IPMask"
+    prompt: "¿Cual es la Mascara?"
+    private: no
+    default: 255.255.255.0
+  - name: "IPGateway"
+    prompt: "¿Cual es la puerta de enlace predeterminada?"
+    private: no
+    default: 10.192.93.1
+  tasks:
+  - name: Instalando el repositorio de EPEL
+    yum:
+      name:
+        - epel-release.noarch
+      state: present
+  - name: Instalando paquetes genericos
+    yum:
+      name:
+        - bash-completion
+        - wget
+        - git
+        - screen
+        - vim
+        - yum-utils
+        - expect
+        - net-snmp
+        - net-snmp-libs
+        - net-snmp-utils
+        - atop
+        - iotop
+        - htop
+        - ntp
+        - ntpdate
+        - openssh-clients
+        - python3
+        - python3-pip
+        - dnf
+      state: present
+  - name: Instalando el repositorio de Syslog-NG para CentOS 7
+    get_url:
+      url: https://copr.fedorainfracloud.org/coprs/czanik/syslog-ng318/repo/epel-7/czanik-syslog-ng318-epel-7.repo
+      dest: /etc/yum.repos.d/syslog-ng.repo
+  - name: Instalando el servidor de Syslog (Syslog-NG)
+    yum:
+      name:
+        - syslog-ng
+        - syslog-ng-libdbi
+        - syslog-ng-http
+        - syslog-ng-redis
+      state: present
+  - name: Actualizando el Sistena Operativo (CentOS 7)
+    yum:
+      name: '*'
+      state: latest
+  - name: Creando Bonding Interfaces
+    copy:
+      dest: /etc/sysconfig/network-scripts/ifcfg-bond0
+      backup: yes
+      content: |
+        TYPE=Ethernet
+        PROXY_METHOD=none
+        BROWSER_ONLY=no
+        BOOTPROTO=none
+        DEFROUTE=yes
+        IPV4_FAILURE_FATAL=no
+        IPV6INIT=yes
+        IPV6_AUTOCONF=yes
+        IPV6_DEFROUTE=yes
+        IPV6_FAILURE_FATAL=no
+        IPV6_ADDR_GEN_MODE=stable-privacy
+        NAME=bond0
+        DEVICE=bond0
+        ONBOOT=yes
+        IPADDR={{ IPAddress }}
+        NETMASK={{ IPMask }}
+        GATEWAY={{ IPGateway }}
+        BONDING_MASTER=yes
+        BONDING_OPTS="mode=active-backup miimon=100 updelay=50000 primary=eno1"
+        ZONE=PUBLIC
+  - name: Creando ENO interfaces
+    copy:
+      dest: "{{ item.dest }}"
+      backup: yes
+      content: |
+        TYPE=Ethernet
+        PROXY_METHOD=none
+        BROWSER_ONLY=no
+        BOOTPROTO=none
+        DEFROUTE=yes
+        IPV4_FAILURE_FATAL=no
+        IPV6INIT=yes
+        IPV6_AUTOCONF=yes
+        IPV6_DEFROUTE=yes
+        IPV6_FAILURE_FATAL=no
+        IPV6_ADDR_GEN_MODE=stable-privacy
+        NAME={{ item.eth }}
+        DEVICE={{ item.eth }}
+        ONBOOT=yes
+        MASTER=bond0
+        SLAVE=yes
+    with_items:
+      - { dest: /etc/sysconfig/network-scripts/ifcfg-eno1,  eth: eno1 }
+      - { dest: /etc/sysconfig/network-scripts/ifcfg-eno2,  eth: eno2 }
+  - name: Creando los directorios
+    file:
+      path: "{{ item.path }}"
+      state: directory
+    with_items:
+      - { path: /etc/orange}
+      - { path: /home/procesados}
+      - { path: /home/procesados/enviados}
+      - { path: /var/log/nat}
+  - name: Copiamos los ficheros de configuración
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      owner: root
+      group: root
+      mode: "{{ item.mode }}"
+      force: yes
+      backup: yes
+    with_items:
+      - { src: motd,           dest: /etc/orange/motd,               mode: 755 }
+      - { src: orangemain,     dest: /etc/orange/orangemain,         mode: 755 }
+      - { src: orangesftp,     dest: /etc/orange/orangesftp,         mode: 755 }
+      - { src: issue,          dest: /etc/issue,                     mode: 644 }
+      - { src: nat,            dest: /etc/logrotate.d/nat,           mode: 644 }
+      - { src: vimrc,          dest: /root/.vimrc,                   mode: 644 }
+      - { src: syslog-ng.conf, dest: /etc/syslog-ng/syslog-ng.conf,  mode: 644 }
+      - { src: snmpd.conf,     dest: /etc/snmp/snmpd.conf,           mode: 644 }
+      - { src: ntp.conf,       dest: /etc/ntp.conf,                  mode: 644 }
+      - { src: iptable,        dest: /etc/sysconfig/iptables,        mode: 644 }
+      - { src: crontab,        dest: /etc/crontab,                   mode: 644 }
+      - { src: sshd_config,    dest: /etc/ssh/sshd_config,           mode: 644 }
+  - name: Cambio de configuracion del servicio de Syslog-NG
+    replace:
+      path: '/etc/syslog-ng/syslog-ng.conf'
+      regexp: 'HOSTNAME-SYSLOG'
+      replace: '{{ hosts_tmp }}'
+  - name: Habilitamos y Reiniciamos los siguientes servicios de SYSLOG-NG, SNMPD, NTPD, SSHD
+    systemd:
+      name: "{{ item.service }}"
+      state: started
+      enabled: True
+    with_items:
+      - { service: syslog-ng}
+      - { service: snmpd }
+      - { service: ntpd }
+      - { service: sshd }

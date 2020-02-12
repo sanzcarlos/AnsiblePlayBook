@@ -1,0 +1,64 @@
+#!/bin/bash
+
+date=$(date +"%F-%H:%M")
+date_day=$(date +%F)
+day=5
+
+# Definimos los archivos de logs
+LOGFILE=/home/procesados/${HOSTNAME}_script_${date_day}.log
+LOGIPTABLES=/home/procesados/${HOSTNAME}_iptables_${date_day}.log
+
+# Comenzamos el script
+echo -e "$(date +"%F %T"):\t### Comienzo del Script ### " >> $LOGFILE 2>&1
+
+# Actualizamos el logrotate
+logrotate -f /etc/logrotate.d/nat
+
+# Comprobamos la cantidad de trafico que se ha mandado
+now=$(date +"%F %T")
+echo -e "$now:\tEstadisticas de IPtables" >> $LOGIPTABLES 2>&1
+iptables --list --numeric --verbose | grep 'udp dpt:514' >> $LOGIPTABLES 2>&1
+iptables --zero
+
+# Cambiamos el nombre del fichero
+find /var/log/nat/ -maxdepth 1 -name $HOSTNAME\* -exec rename .1 _DSI-$date.log  {}  \;
+
+# Movemos el archivo temporal
+mv /var/log/nat/*_DSI*.log /home/procesados/
+
+# Comprimimos el archivo que hemos generado
+find /home/procesados/ -maxdepth 1 -name $HOSTNAME\*DSI*.log -exec gzip -9 {} \;
+
+# Buscamos los archivos en el directorio
+now=$(date +"%F %T")
+find /home/procesados/ -maxdepth 1 -name $HOSTNAME\*DSI*.log.gz -and -not -name $HOSTNAME\*ALL*.log.gz -exec echo -e "$now:\tFichero: "{} >> $LOGFILE 2>&1 \;
+file=$(find /home/procesados/ -maxdepth 1 -name $HOSTNAME\*DSI*.log.gz -and -not -name $HOSTNAME\*ALL*.log.gz)
+
+for fichero in $file
+do
+  # Transferimos el fichero
+  /etc/orange/orangesftp $fichero
+
+  # comprobamos que el error devuelto por sftp sea 0 = correcto
+  if [ $? = 0 ];
+  then
+    now=$(date +"%F %T")
+    echo -e "$now:\tOK - Se ha transferido el fichero $fichero correctamente" >> $LOGFILE 2>&1
+    echo -e "$now:\tOK - Movemos el fichero $fichero al directorio /home/procesados/enviados/" >> $LOGFILE 2>&1
+    mv $fichero /home/procesados/enviados/
+  else
+    now=$(date +"%F %T")
+    echo -e "$now:\tERROR - Se ha producido un error al intentar transferir el fichero $fichero" >> $LOGFILE 2>&1
+  fi
+done
+
+# Borramos los ficheros que llevan mas de 5 dias sin modificaciones
+echo -e "$(date +"%F %T"):\t=== Borramos los Ficheros Antiguos ===" >> $LOGFILE 2>&1
+find /home/procesados/enviados/ -maxdepth 1 -mtime $day -exec echo -e "\t\t\t"{} >> $LOGFILE 2>&1 \;
+find /home/procesados/enviados/ -maxdepth 1 -mtime $day -exec rm -f {} \;
+find /home/procesados/ -maxdepth 1 -mtime $day -exec echo -e "\t\t\t"{} >> $LOGFILE 2>&1 \;
+find /home/procesados/ -maxdepth 1 -type f -mtime $day -exec rm -f {} \;
+
+# Finalizamos el script
+echo -e "$(date +"%F %T"):\t### Script Finalizado ###" >> $LOGFILE 2>&1
+echo -e "\n" >> $LOGFILE 2>&1

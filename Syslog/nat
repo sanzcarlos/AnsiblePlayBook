@@ -1,0 +1,11 @@
+/var/log/nat/*
+{
+        rotate 8
+        missingok
+        extension log
+        notifempty
+        sharedscripts
+        postrotate
+                service syslog-ng reload > /dev/null
+        endscript
+}
