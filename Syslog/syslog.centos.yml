@@ -3,10 +3,11 @@
   - name: "hosts_tmp"
     prompt: "¿En que servidor se instalara el Syslog?"
     private: no
+    default: SYSLOG
   - name: "IPAddress"
     prompt: "¿Cual es la direccion IP?"
     private: no
-    default: 10.192.93.10
+    default: 1.1.1.1
   - name: "IPMask"
     prompt: "¿Cual es la Mascara?"
     private: no
@@ -14,7 +15,11 @@
   - name: "IPGateway"
     prompt: "¿Cual es la puerta de enlace predeterminada?"
     private: no
-    default: 10.192.93.1
+    default: 1.1.1.254
+  - name: "IPCGNAT"
+    prompt: "¿Cual es la IP para conexion con CGNAT?"
+    private: no
+    default: 169.254.0.1
   tasks:
   - name: Instalando el repositorio de EPEL
     yum:
@@ -60,6 +65,28 @@
     yum:
       name: '*'
       state: latest
+  - name: Creando ENO5 Interfaces
+    copy:
+      dest: /etc/sysconfig/network-scripts/ifcfg-eno5
+      backup: yes
+      content: |
+        TYPE=Ethernet
+        PROXY_METHOD=none
+        BROWSER_ONLY=no
+        BOOTPROTO=none
+        DEFROUTE=yes
+        IPV4_FAILURE_FATAL=no
+        IPV6INIT=yes
+        IPV6_AUTOCONF=yes
+        IPV6_DEFROUTE=yes
+        IPV6_FAILURE_FATAL=no
+        IPV6_ADDR_GEN_MODE=stable-privacy
+        NAME=eno5
+        DEVICE=eno5
+        ONBOOT=yes
+        IPADDR={{ IPCGNAT }}
+        NETMASK=255.255.255.224
+        ZONE=PUBLIC
   - name: Creando Bonding Interfaces
     copy:
       dest: /etc/sysconfig/network-scripts/ifcfg-bond0
@@ -140,11 +167,20 @@
       - { src: iptable,        dest: /etc/sysconfig/iptables,        mode: 644 }
       - { src: crontab,        dest: /etc/crontab,                   mode: 644 }
       - { src: sshd_config,    dest: /etc/ssh/sshd_config,           mode: 644 }
+      - { src: ssacli-4.15-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
+  - name: Modificamos /etc/profile
+    lineinfile:
+      path: /etc/profile
+      line: /etc/orange/motd
   - name: Cambio de configuracion del servicio de Syslog-NG
     replace:
       path: '/etc/syslog-ng/syslog-ng.conf'
       regexp: 'HOSTNAME-SYSLOG'
       replace: '{{ hosts_tmp }}'
+  - name: Instalamos el package ssacli
+    yum:
+      name: /root/ssacli-4.15-6.0.x86_64.rpm
+      state: present
   - name: Habilitamos y Reiniciamos los siguientes servicios de SYSLOG-NG, SNMPD, NTPD, SSHD
     systemd:
       name: "{{ item.service }}"
