@@ -45,35 +45,35 @@ ok: [SYSLOG]
 TASK [Instalando el repositorio de EPEL] ****************************************************************************************************
 changed: [SYSLOG]
 
-TASK [Instalando paquetes genericos] *****************************************************************************************************************************************************
+TASK [Instalando paquetes genericos] ********************************************************************************************************
 changed: [SYSLOG]
 
-TASK [Instalando el repositorio de Syslog-NG para CentOS 7] ******************************************************************************************************************************
+TASK [Instalando el repositorio de Syslog-NG para CentOS 7] *********************************************************************************
 changed: [SYSLOG]
 
-TASK [Instalando el servidor de Syslog (Syslog-NG)] **************************************************************************************************************************************
+TASK [Instalando el servidor de Syslog (Syslog-NG)] *****************************************************************************************
 changed: [SYSLOG]
 
-TASK [Actualizando el Sistena Operativo (CentOS 7)] **************************************************************************************************************************************
+TASK [Actualizando el Sistena Operativo (CentOS 7)] *****************************************************************************************
 changed: [SYSLOG]
 
-TASK [Creando ENO5 Interfaces] ***********************************************************************************************************************************************************
+TASK [Creando ENO5 Interfaces] **************************************************************************************************************
 changed: [SYSLOG]
 
-TASK [Creando Bonding Interfaces] ********************************************************************************************************************************************************
+TASK [Creando Bonding Interfaces] ***********************************************************************************************************
 changed: [SYSLOG]
 
-TASK [Creando ENO interfaces] ************************************************************************************************************************************************************
+TASK [Creando ENO interfaces] ***************************************************************************************************************
 changed: [SYSLOG] => (item={'dest': '/etc/sysconfig/network-scripts/ifcfg-eno1', 'eth': 'eno1'})
 changed: [SYSLOG] => (item={'dest': '/etc/sysconfig/network-scripts/ifcfg-eno2', 'eth': 'eno2'})
 
-TASK [Creando los directorios] ***********************************************************************************************************************************************************
+TASK [Creando los directorios] **************************************************************************************************************
 changed: [SYSLOG] => (item={'path': '/etc/orange'})
 changed: [SYSLOG] => (item={'path': '/home/procesados'})
 changed: [SYSLOG] => (item={'path': '/home/procesados/enviados'})
 changed: [SYSLOG] => (item={'path': '/var/log/nat'})
 
-TASK [Copiamos los ficheros de configuración] ********************************************************************************************************************************************
+TASK [Copiamos los ficheros de configuración] ***********************************************************************************************
 changed: [SYSLOG] => (item={'src': 'motd', 'dest': '/etc/orange/motd', 'mode': 755})
 changed: [SYSLOG] => (item={'src': 'orangemain', 'dest': '/etc/orange/orangemain', 'mode': 755})
 changed: [SYSLOG] => (item={'src': 'orangesftp', 'dest': '/etc/orange/orangesftp', 'mode': 755})
@@ -88,21 +88,21 @@ changed: [SYSLOG] => (item={'src': 'crontab', 'dest': '/etc/crontab', 'mode': 64
 changed: [SYSLOG] => (item={'src': 'sshd_config', 'dest': '/etc/ssh/sshd_config', 'mode': 644})
 changed: [SYSLOG] => (item={'src': 'ssacli-3.40-3.0.x86_64.rpm', 'dest': '/root/', 'mode': 644})
 
-TASK [Modificamos /etc/profile] **********************************************************************************************************************************************************
+TASK [Modificamos /etc/profile] *************************************************************************************************************
 changed: [SYSLOG]
 
-TASK [Cambio de configuracion del servicio de Syslog-NG] *********************************************************************************************************************************
+TASK [Cambio de configuracion del servicio de Syslog-NG] ************************************************************************************
 changed: [SYSLOG]
 
-TASK [Instalamos el package ssacli] ******************************************************************************************************************************************************
+TASK [Instalamos el package ssacli] *********************************************************************************************************
 changed: [SYSLOG]
 
-TASK [Habilitamos y Reiniciamos los siguientes servicios de SYSLOG-NG, SNMPD, NTPD, SSHD] ************************************************************************************************
+TASK [Habilitamos y Reiniciamos los siguientes servicios de SYSLOG-NG, SNMPD, NTPD, SSHD] ***************************************************
 changed: [SYSLOG] => (item={'service': 'syslog-ng'})
 changed: [SYSLOG] => (item={'service': 'snmpd'})
 changed: [SYSLOG] => (item={'service': 'ntpd'})
 ok: [SYSLOG] => (item={'service': 'sshd'})
 
-PLAY RECAP *******************************************************************************************************************************************************************************
+PLAY RECAP **********************************************************************************************************************************
 SYSLOG                   : ok=15   changed=14   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
