@@ -1,0 +1,13 @@
+#
+# Failover dhcpd
+#
+failover peer "dhcp-failover" {
+  secondary; # declare this to be the secundary server
+  address 192.168.50.84;
+  port 647;
+  peer address 192.168.50.79;
+  peer port 647;
+  max-response-delay 30;
+  max-unacked-updates 10;
+  load balance max seconds 3;
+}

@@ -1,0 +1,36 @@
+- hosts: "{{ hosts_tmp }}"
+  vars_prompt:
+  - name: "hosts_tmp"
+    prompt: "¿En que servidor se actualizaran los servicios?"
+    private: no
+    default: vmbackup01.voip.local
+  tasks:
+  - name: Copiamos los ficheros de configuración
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      owner: root
+      group: root
+      mode: "{{ item.mode }}"
+      force: yes
+      backup: yes
+    with_items:
+      - { src: motd-new,                 dest: /etc/motd-new,                    mode: 755 }
+      - { src: resolv.conf,              dest: /etc/resolv.conf,                 mode: 755 }
+      - { src: db.voip.local,            dest: /etc/bind/db.voip.local,          mode: 755 }
+      - { src: named.conf.options,       dest: /etc/bind/named.conf.options,     mode: 755 }
+      - { src: named.conf.local.master,  dest: /etc/bind/named.conf.local,       mode: 755 }
+      - { src: named.conf.local.slave,   dest: /etc/bind/named.conf.local,       mode: 755 }
+      - { src: isc-dhcp-server,          dest: /etc/default/isc-dhcp-server,     mode: 755 }
+      - { src: r1.res,                   dest: /etc/drbd.d/r1.res,               mode: 755 }
+  - name: Modificamos /etc/profile
+    lineinfile:
+      path: /etc/profile
+      line: /etc/motd-new
+  - name: Habilitamos y Reiniciamos los siguientes servicios de SYSLOG-NG, SNMPD, NTPD, SSHD
+    systemd:
+      name: "{{ item.service }}"
+      state: started
+      enabled: True
+    with_items:
+      - { service: sshd }

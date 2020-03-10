@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#
+# Variables
+#
+FECHAHORA=$(date +%Y%d%m%H%M%S)
+dhcp_dir="/etc/dhcp"
+log_dir="/var/log/dhcpd"
+configuracion="${dhcp_dir}/dhcpd.conf"
+config_old="${configuracion}_${FECHAHORA}"
+origen=$(hostname)
+ERRORLOG="${log_dir}/dhcpd_replication_error.log"
+
+#
+# Funciones
+#
+
+function die()
+{
+    echo -e "${FECHAHORA} $@"
+    echo -e "${FECHAHORA} $@" >> "${ERRORLOG}"
+    exit 1
+}
+
+
+#
+# Proceso
+#
+
+# Comprobamos la sintaxis primero
+if ! result=$(/usr/sbin/dhcpd -t -cf "${configuracion}" 2>&1); then
+    die "Errores de sintaxis en la configuracion ${configuracion}\n${result}"
+fi
+
+#
+# Copiamos la configuracion al otro servidor y reiniciamos ambos
+#
+[ "${origen}" == "vmbackup01.voip.local" ] && destino="vmbackup02.voip.local" || destino="vmbackup01.voip.local"
+echo "Copiando la configuracion al otro nodo ${destino} ..."
+if ! result=$(scp -p "${configuracion}" "${config_old}" "${destino}:${dhcp_dir}" 2>&1); then
+    die "Error copiando la configuracion al otro nodo ${destino}\n${result}"
+fi
+echo "Reiniciando servidor dhcp en ${origen} ..."
+if ! result=$(/usr/bin/systemctl restart dhcpd 2>&1); then
+    die "Error reiniciando el servicio en ${origen}\n${result}"
+fi
+echo "Reiniciando servidor dhcp en el otro nodo ${destino} ..."
+ssh "$destino" '/usr/bin/systemctl restart dhcpd'

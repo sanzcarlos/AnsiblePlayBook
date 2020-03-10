@@ -1,0 +1,54 @@
+;
+; BIND data file for local loopback interface
+; Zone voip.local ( @ = voip.local )
+;
+$TTL    86400
+@       IN      SOA     voip.local. root.voip.local. (
+                        5
+                        604800
+                        86400
+                        2419200
+                        604800 )
+;
+@       IN      NS      vmbackup01.voip.local.
+@       IN      NS      vmbackup02.voip.local.
+@       IN      A       127.0.0.1
+@       IN      AAAA    ::1
+
+;
+; Record A
+;
+vmcucmp01       IN      A       192.168.50.74
+vmcucms01       IN      A       192.168.50.75
+vmcucms02       IN      A       192.168.50.76
+vmcucp01        IN      A       192.168.50.77
+gateway         IN      A       192.168.50.78
+vmbackup01      IN      A       192.168.50.79
+ucscimc01       IN      A       192.168.50.80
+ucscimc02       IN      A       192.168.50.81
+ucsesxi01       IN      A       192.168.50.82
+ucsesxi02       IN      A       192.168.50.83
+vmbackup02      IN      A       192.168.50.84
+
+;
+; Record NAPTR
+;
+
+;
+; Record PTR
+;
+74      IN      PTR     vmcucmp01.voip.local.
+75      IN      PTR     vmcucms01.voip.local.
+76      IN      PTR     vmcucms02.voip.local.
+77      IN      PTR     vmcucp01.voip.local.
+78      IN      PTR     gateway.voip.local.
+79      IN      PTR     vmbackup01.voip.local.
+80      IN      PTR     ucscimc01.voip.local.
+81      IN      PTR     ucscimc02.voip.local.
+82      IN      PTR     ucsesxi01.voip.local.
+83      IN      PTR     ucsesxi02.voip.local.
+84      IN      PTR     vmbackup02.voip.local.
+
+;
+; Record SRV
+;
