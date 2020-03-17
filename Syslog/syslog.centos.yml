@@ -181,6 +181,16 @@
     yum:
       name: /root/ssacli-4.15-6.0.x86_64.rpm
       state: present
+  - name: Habilitamos las reglas para firewalld
+    firewalld:
+      zone: public
+      service: "{{ item.service }}"
+      permanent: yes
+      state: enabled
+      immediate: yes
+    with_items:
+      - { service: snmp}
+      - { service: syslog }
   - name: Habilitamos y Reiniciamos los siguientes servicios de SYSLOG-NG, SNMPD, NTPD, SSHD
     systemd:
       name: "{{ item.service }}"
