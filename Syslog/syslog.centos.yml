@@ -164,7 +164,7 @@
       - { src: syslog-ng.conf, dest: /etc/syslog-ng/syslog-ng.conf,  mode: 644 }
       - { src: snmpd.conf,     dest: /etc/snmp/snmpd.conf,           mode: 644 }
       - { src: ntp.conf,       dest: /etc/ntp.conf,                  mode: 644 }
-      - { src: iptable,        dest: /etc/sysconfig/iptables,        mode: 644 }
+      #- { src: iptable,        dest: /etc/sysconfig/iptables,        mode: 644 }
       - { src: crontab,        dest: /etc/crontab,                   mode: 644 }
       - { src: sshd_config,    dest: /etc/ssh/sshd_config,           mode: 644 }
       - { src: ssacli-4.15-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
