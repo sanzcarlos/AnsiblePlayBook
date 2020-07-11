@@ -1,0 +1,90 @@
+- hosts: "{{ hosts_tmp }}"
+  vars_prompt:
+  - name: "hosts_tmp"
+    prompt: "¿En que servidor se instalara el Kamailio?"
+    private: no
+    default: Kamailio
+  tasks:
+  - name: Instalando el repositorio de EPEL
+    yum:
+      name:
+        - epel-release.noarch
+      state: present
+  - name: Instalando paquetes genericos
+    yum:
+      name:
+        - bash-completion
+        - wget
+        - git
+        - screen
+        - vim
+        - yum-utils
+        - expect
+        - net-snmp
+        - net-snmp-libs
+        - net-snmp-utils
+        - atop
+        - iotop
+        - htop
+        - ntp
+        - ntpdate
+        - openssh-clients
+        - python3
+        - python3-pip
+        - dnf
+      state: present
+  - name: Instalando el repositorio de Syslog-NG para CentOS 8
+    get_url:
+      url: https://copr.fedorainfracloud.org/coprs/czanik/syslog-ng318/repo/epel-7/czanik-syslog-ng318-epel-7.repo
+      dest: /etc/yum.repos.d/syslog-ng.repo
+  - name: Instalando el servidor de Syslog (Syslog-NG)
+    yum:
+      name:
+        - syslog-ng
+        - syslog-ng-libdbi
+        - syslog-ng-http
+        - syslog-ng-redis
+      state: present
+  - name: Actualizando el Sistena Operativo (CentOS 8)
+    yum:
+      name: '*'
+      state: latest
+  - name: Creando los directorios
+    file:
+      path: "{{ item.path }}"
+      state: directory
+    with_items:
+      - { path: /var/log/nat}
+  - name: Copiamos los ficheros de configuración
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      owner: root
+      group: root
+      mode: "{{ item.mode }}"
+      force: yes
+      backup: yes
+    with_items:
+      - { src: motd,           dest: /etc/motd-new,                  mode: 755 }
+      - { src: issue,          dest: /etc/issue,                     mode: 644 }
+  - name: Modificamos /etc/profile
+    lineinfile:
+      path: /etc/profile
+      line: /etc/motd-new
+  - name: Habilitamos las reglas para firewalld
+    firewalld:
+      zone: public
+      service: "{{ item.service }}"
+      permanent: yes
+      state: enabled
+      immediate: yes
+    with_items:
+      - { service: snmp}
+      - { service: syslog }
+  - name: Habilitamos y Reiniciamos los siguientes servicios de SSHD
+    systemd:
+      name: "{{ item.service }}"
+      state: started
+      enabled: True
+    with_items:
+      - { service: sshd }

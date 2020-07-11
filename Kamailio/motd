@@ -1,0 +1,95 @@
+#!/bin/sh
+#
+printf "\n"
+
+printf "Welcome to %s (%s %s %s).\n\n" "$(uname -n)" "$(uname -o)" "$(uname -r)" "$(uname -p)"
+
+#System date
+date=`date`
+
+#System load
+LOAD1=`cat /proc/loadavg | awk {'print $1'}`
+LOAD5=`cat /proc/loadavg | awk {'print $2'}`
+LOAD15=`cat /proc/loadavg | awk {'print $3'}`
+
+#System uptime
+uptime=`cat /proc/uptime | cut -f1 -d.`
+upDays=$((uptime/60/60/24))
+upHours=$((uptime/60/60%24))
+upMins=$((uptime/60%60))
+upSecs=$((uptime%60))
+
+#Root fs info
+root_usage=`df -h / | awk '/\// {print $5}'|grep -v "^$"`
+root_size=`df -h / | awk '/\// {print $2}'|grep -v "^$"`
+home_usage=`df -h /home | awk '/\// {print $5}'|grep -v "^$"`
+home_size=`df -h /home | awk '/\// {print $2}'|grep -v "^$"`
+
+#Memory Usage
+memory_usage=`free -m | awk '/Mem:/ { total=$2 } /buffers\/cache/ { used=$3 } END { printf("%3.1f%%", used/total*100)}'`
+
+#Users
+users=`users | wc -w`
+USER=`whoami`
+
+#Processes
+processes=`ps aux | wc -l`
+
+#Interfaces
+INTERFACE=$(ip -4 ad | grep 'BROADCAST' | awk -F ":" '!/^[0-9]*: ?lo/ {print $2}')
+
+printf "System information as of: %s\n\n" "$date"
+printf "System Load:\t%s %s %s\tSystem Uptime:\t\t%s "days" %s "hours" %s "min" %s "sec"\n" $LOAD1, $LOAD5, $LOAD15 $upDays $upHours $upMins $upSecs
+printf "Memory Usage:\t%s\n" $memory_usage
+printf "Usage On /:\t%s of %s\t\tUsage On /home:\t%s of %s\n" $root_usage $root_size $home_usage $home_size
+printf "Local Users:\t%s\t\t\tWhoami:\t\t\t%s\n" $users $USER
+printf "Processes:\t%s\t\t\t\n" $processes
+printf "\n"
+printf "Interface\t\tMAC Address\t\tIP Address\t\n"
+
+for x in $INTERFACE
+do
+  z=0
+  MAC=$(ip ad show dev $x |grep link/ether |awk '{print $2}')
+  IP=$(ip ad show dev $x | grep "inet " | awk '{print $2}')
+  IP6=$(ip ad show dev $x | grep "inet6" | awk '{print $2}')
+  if [ "${#x}" -ge "15" ]
+  then
+    for y in $IP
+    do
+      if [ $z = 0 ]
+      then
+        printf $x"\t\t"$MAC"\t"$y"\t\n"
+      else
+        printf "\t\t\t\t\t\t"$y"\t\n"
+      fi
+      z=1
+    done
+    for y in $IP6
+    do
+      printf "\t\t\t\t\t\t"$y"\t\n"
+    done
+  else
+    for y in $IP
+    do
+      if [ $z = 0 ]
+      then
+        printf $x"\t\t\t"$MAC"\t"$y"\t\n"
+      else
+        printf "\t\t\t\t\t\t"$y"\t\n"
+      fi
+      z=1
+    done
+    for y in $IP6
+    do
+      printf "\t\t\t\t\t\t"$y"\t\n"
+    done
+  fi
+done
+echo
+
+# Debian
+#if [ -f /var/run/reboot-required ] 
+#then
+#  echo "*** Hello $USER, you must reboot your machine ***"
+#fi
