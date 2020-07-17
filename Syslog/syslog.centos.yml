@@ -174,8 +174,8 @@
       line: /etc/orange/motd
 #  - name: Modificamos el archivo de arranque de Syslog-NG
 #    lineinfile:
-#      path: /etc/profile
-#      line: /etc/orange/motd
+#      path: /usr/lib/systemd/system/syslog-ng.service
+#      line: After=network.target
   - name: Cambio de configuracion del servicio de Syslog-NG
     replace:
       path: '/etc/syslog-ng/syslog-ng.conf'
