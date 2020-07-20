@@ -167,6 +167,7 @@
       #- { src: iptable,        dest: /etc/sysconfig/iptables,        mode: 644 }
       - { src: crontab,        dest: /etc/crontab,                   mode: 644 }
       - { src: sshd_config,    dest: /etc/ssh/sshd_config,           mode: 644 }
+      - { src: config,         dest: /root/.ssh/config,              mode: 400 }
       - { src: ssacli-4.15-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
   - name: Modificamos /etc/profile
     lineinfile:
