@@ -168,6 +168,7 @@
       - { src: crontab,        dest: /etc/crontab,                   mode: 644 }
       - { src: sshd_config,    dest: /etc/ssh/sshd_config,           mode: 644 }
       - { src: config,         dest: /root/.ssh/config,              mode: 400 }
+      # https://downloads.linux.hpe.com/SDR/repo/mcp/centos/7/x86_64/current/
       - { src: ssacli-4.15-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
   - name: Modificamos /etc/profile
     lineinfile:
