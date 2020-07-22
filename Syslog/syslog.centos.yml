@@ -158,7 +158,9 @@
       - { src: motd,           dest: /etc/orange/motd,               mode: 755 }
       - { src: orangemain,     dest: /etc/orange/orangemain,         mode: 755 }
       - { src: orangesftp,     dest: /etc/orange/orangesftp,         mode: 755 }
+      - { src: apolo.conf,     dest: /etc/orange/apolo.conf,         mode: 644 }
       - { src: issue,          dest: /etc/issue,                     mode: 644 }
+      - { src: resolv.conf,    dest: /etc/resolv.conf,               mode: 644 }
       - { src: nat,            dest: /etc/logrotate.d/nat,           mode: 644 }
       - { src: vimrc,          dest: /root/.vimrc,                   mode: 644 }
       - { src: syslog-ng.conf, dest: /etc/syslog-ng/syslog-ng.conf,  mode: 644 }

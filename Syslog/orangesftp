@@ -3,7 +3,7 @@
 ## Definimos las variables que vamos a utilizar en el script
 set username  "ftp_hduserp1"
 set password  "temporal54"
-set host      "10.113.56.114"
+set host      [lindex $argv 1]
 set directory "ip_firewall_nodo"
 set timeout  -1
 

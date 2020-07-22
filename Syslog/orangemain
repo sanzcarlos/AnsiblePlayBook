@@ -8,6 +8,11 @@ day=5
 LOGFILE=/home/procesados/${HOSTNAME}_script_${date_day}.log
 LOGIPTABLES=/home/procesados/${HOSTNAME}_iptables_${date_day}.log
 
+# Definimos el Servidor de Apolo
+#    $2 - IP Address
+#    $3 - FQDN
+APOLO=$(grep $HOSTNAME apolo.conf | awk -F "|" '{print $2}')
+
 # Comenzamos el script
 echo -e "$(date +"%F %T"):\t### Comienzo del Script ### " >> $LOGFILE 2>&1
 
@@ -37,7 +42,7 @@ file=$(find /home/procesados/ -maxdepth 1 -name $HOSTNAME\*DSI*.log.gz -and -not
 for fichero in $file
 do
   # Transferimos el fichero
-  /etc/orange/orangesftp $fichero
+  /etc/orange/orangesftp $fichero $APOLO
 
   # comprobamos que el error devuelto por sftp sea 0 = correcto
   if [ $? = 0 ];
