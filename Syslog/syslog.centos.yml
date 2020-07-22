@@ -172,6 +172,7 @@
       - { src: config,         dest: /root/.ssh/config,              mode: 400 }
       # https://downloads.linux.hpe.com/SDR/repo/mcp/centos/7/x86_64/current/
       - { src: ssacli-4.15-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
+      - { src: ssacli-4.17-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
   - name: Modificamos /etc/profile
     lineinfile:
       path: /etc/profile
