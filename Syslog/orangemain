@@ -11,7 +11,7 @@ LOGIPTABLES=/home/procesados/${HOSTNAME}_iptables_${date_day}.log
 # Definimos el Servidor de Apolo
 #    $2 - IP Address
 #    $3 - FQDN
-APOLO=$(grep $HOSTNAME apolo.conf | awk -F "|" '{print $2}')
+APOLO=$(grep $HOSTNAME /etc/orange/apolo.conf | awk -F "|" '{print $2}')
 
 # Comenzamos el script
 echo -e "$(date +"%F %T"):\t### Comienzo del Script ### " >> $LOGFILE 2>&1
