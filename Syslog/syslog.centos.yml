@@ -39,6 +39,7 @@
         - net-snmp
         - net-snmp-libs
         - net-snmp-utils
+        - net-tools
         - atop
         - iotop
         - htop
@@ -61,6 +62,10 @@
         - syslog-ng-http
         - syslog-ng-redis
       state: present
+  - name: Borrando Rsyslog
+    yum:
+      name: rsyslog
+      state: removed
   - name: Actualizando el Sistena Operativo (CentOS 7)
     yum:
       name: '*'
@@ -139,12 +144,14 @@
   - name: Creando los directorios
     file:
       path: "{{ item.path }}"
+      mode: "{{ item.mode }}"
       state: directory
     with_items:
-      - { path: /etc/orange}
-      - { path: /home/procesados}
-      - { path: /home/procesados/enviados}
-      - { path: /var/log/nat}
+      - { path: /etc/orange,                  mode: '0755'}
+      - { path: /home/procesados,             mode: '0755'}
+      - { path: /home/procesados/enviados,    mode: '0755'}
+      - { path: /var/log/nat,                 mode: '0755'}
+      - { path: /root/.ssh,                   mode: '0700'}
   - name: Copiamos los ficheros de configuración
     copy:
       src: "{{ item.src }}"
@@ -169,7 +176,7 @@
       #- { src: iptable,        dest: /etc/sysconfig/iptables,        mode: 644 }
       - { src: crontab,        dest: /etc/crontab,                   mode: 644 }
       - { src: sshd_config,    dest: /etc/ssh/sshd_config,           mode: 644 }
-      - { src: config,         dest: /root/.ssh/config,              mode: 400 }
+      - { src: config,         dest: /root/.ssh/config,              mode: 600 }
       # https://downloads.linux.hpe.com/SDR/repo/mcp/centos/7/x86_64/current/
       - { src: ssacli-4.15-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
       - { src: ssacli-4.17-6.0.x86_64.rpm, dest: /root/,             mode: 644 }
