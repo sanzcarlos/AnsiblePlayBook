@@ -1,0 +1,23 @@
+---
+- hosts: pihole
+  environment:
+    LC_ALL: C
+    LANG: C
+
+  tasks:
+
+  - name: Run the equivalent of "apt-get update" as a separate step
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Upgrade the OS (apt-get dist-upgrade)
+    ansible.builtin.apt:
+      upgrade: dist
+
+  - name: Remove useless packages from the cache
+    ansible.builtin.apt:
+      autoclean: yes
+
+  - name: Remove dependencies that are no longer required
+    ansible.builtin.apt:
+      autoremove: yes
