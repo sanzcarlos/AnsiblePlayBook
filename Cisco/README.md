@@ -1,2 +1,2 @@
 # ANSIBLE
-En este repositorio vamos a poner todos los pleybooks
+Se ha copiado todo el contenido del repositorio https://github.com/CiscoDevNet/axl-ansible-examples aqui para poder trabajar en local en la configuración de un playbook para la configuración del CUCM de Cisco
