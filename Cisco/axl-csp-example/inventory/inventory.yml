@@ -1,0 +1,14 @@
+---
+HQCluster:
+  hosts:
+    192.168.80.230:
+      axl_user: ccmadministrator
+      axl_password: NTTvoip2020.
+      cli_user: administrator
+      cli_password: NTTvoip2020.
+
+WebexOrgs:
+  hosts:
+    ntt.webex.com:
+      org_id:
+      credential:
