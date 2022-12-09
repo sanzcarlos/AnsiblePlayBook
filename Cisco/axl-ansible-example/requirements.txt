@@ -1,7 +1,7 @@
 ansible==5.8.0
 ansible-core==2.12.6
 bcrypt==3.2.2
-certifi==2022.5.18.1
+certifi==2022.12.7
 cffi==1.15.0
 charset-normalizer==2.0.12
 cryptography==37.0.2
