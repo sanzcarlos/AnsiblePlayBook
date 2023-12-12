@@ -1,4 +1,6 @@
 # Best Practice
+Vamos a utilizar la siguiente estructura de directorios para nuestro proyecto de pesonalización de un entorno de trabaja con Kali Linux
+
 ## [Alternative Directory Layout](https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html)
 ```
 inventories/
