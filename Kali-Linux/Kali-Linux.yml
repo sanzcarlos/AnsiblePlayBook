@@ -6,6 +6,7 @@
     prompt: "¿Cual es el username?"
     private: no
     default: user
+  # https://pastebin.com/EEX1Dsuq
 
   tasks:
 
@@ -109,6 +110,7 @@
     with_items:
       - { path: ~/.config/bspwm,    mode: '0755'}
       - { path: ~/.config/sxhkd,    mode: '0755'}
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - production
 
@@ -121,6 +123,49 @@
     with_items:
       - { src: bspwmrc, dest: ~/.config/bspwm/, mode: '0755' }
       - { src: sxhkdrc, dest: ~/.config/sxhkd/, mode: '0644' }
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - staging
 
+  - name: Change file ownership and group
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html
+    ansible.builtin.file:
+      path: /usr/local/share/zsh/site-functions/_bspc
+      owner: root
+      group: root
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - staging
+
+  - name: Install polybar
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    ansible.builtin.apt:
+      pkg:
+        - cmake
+        - cmake-data
+        - pkg-config
+        - python3-sphinx
+        - libcairo2-dev
+        - libxcb1-dev
+        - libxcb-util0-dev
+        - libxcb-randr0-dev
+        - libxcb-composite0-dev
+        - python3-xcbgen
+        - xcb-proto
+        - libxcb-image0-dev
+        - libxcb-ewmh-dev
+        - libxcb-icccm4-dev
+        - libxcb-xkb-dev
+        - libxcb-xrm-dev
+        - libxcb-cursor-dev
+        - libasound2-dev
+        - libpulse-dev
+        - libjsoncpp-dev
+        - libmpdclient-dev
+        - libuv1-dev
+        - libnl-genl-3-dev
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - staging
