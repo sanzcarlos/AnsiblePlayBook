@@ -7,3 +7,11 @@ test_raspberrypi:
   hosts:
     192.168.1.30:
       ansible_port: 65323
+
+Kali:
+  hosts:
+    192.168.1.120:
+      ansible_port: 65323
+      ansible_user: csanz
+      ansible_ssh_pass: frnpsfpx
+      ansible_become_password: frnpsfpx

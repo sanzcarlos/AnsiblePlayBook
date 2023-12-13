@@ -1,0 +1,126 @@
+---
+- name: Kali Linux - s4vitar
+  hosts: 192.168.1.120
+  vars_prompt:
+  - name: "user_tmp"
+    prompt: "¿Cual es el username?"
+    private: no
+    default: user
+
+  tasks:
+
+  - name: Update Server (apt update && apt dist-upgrade && apt autoclean && apt autoemove)
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    ansible.builtin.apt:
+      update_cache: yes
+      upgrade: dist
+      autoclean: yes
+      autoremove: yes
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Install Software
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    ansible.builtin.apt:
+      pkg:
+        - build-essential
+        - git
+        - vim
+        - libxcb-util0-dev
+        - libxcb-ewmh-dev
+        - libxcb-randr0-dev
+        - libxcb-icccm4-dev
+        - libxcb-keysyms1-dev
+        - libxcb-xinerama0-dev
+        - libasound2-dev
+        - libxcb-xtest0-dev
+        - libxcb-shape0-dev
+        - libxinerama1
+        - libxinerama-dev
+        - kitty
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Clone git repositorie (https://github.com/baskerville/bspwm)
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
+    ansible.builtin.git:
+      repo: https://github.com/baskerville/bspwm
+      clone: yes
+      dest:  /home/{{user_tmp}}/git/bspwm
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Clone git repositorie (https://github.com/baskerville/sxhkd)
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
+    ansible.builtin.git:
+      repo: https://github.com/baskerville/sxhkd
+      clone: yes
+      dest:  ~/git/sxhkd
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Compile BSPWM
+    # https://docs.ansible.com/ansible/latest/collections/community/general/make_module.html
+    community.general.make:
+      chdir:  ~/git/bspwm
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Install BSPWM from source
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/community/general/make_module.html
+    community.general.make:
+      chdir:  /home/{{user_tmp}}/git/bspwm
+      target: install
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Compile SXHKD
+    # https://docs.ansible.com/ansible/latest/collections/community/general/make_module.html
+    community.general.make:
+      chdir:  ~/git/sxhkd
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Install SXHKD from source
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/community/general/make_module.html
+    community.general.make:
+      chdir:  /home/{{user_tmp}}/git/sxhkd
+      target: install
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Create directories
+    file:
+      path: "{{ item.path }}"
+      mode: "{{ item.mode }}"
+      state: directory
+    with_items:
+      - { path: ~/.config/bspwm,    mode: '0755'}
+      - { path: ~/.config/sxhkd,    mode: '0755'}
+    tags:
+      - production
+
+  - name: Copy config file for BSPWM & SXHKD
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
+    ansible.builtin.copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: "{{ item.mode }}"
+    with_items:
+      - { src: bspwmrc, dest: ~/.config/bspwm/, mode: '0755' }
+      - { src: sxhkdrc, dest: ~/.config/sxhkd/, mode: '0644' }
+    tags:
+      - staging
+
