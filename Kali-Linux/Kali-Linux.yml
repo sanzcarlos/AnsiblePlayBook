@@ -128,7 +128,7 @@
       - { src: bspwm_resize, dest: ~/.config/bspwm/scripts/, mode: '0755' }
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
-      - staging
+      - production
 
   - name: Change file ownership and group
     become: yes
@@ -139,7 +139,7 @@
       group: root
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
-      - staging
+      - production
 
   - name: Install polybar
     become: yes
@@ -171,7 +171,7 @@
         - libnl-genl-3-dev
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
-      - staging
+      - production
 
   - name: Clone git repositorie (hhttps://github.com/polybar/polybar)
     # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
@@ -181,4 +181,21 @@
       dest:  ~/git/polybar
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
+      - production
+
+  - name: Create a directory if it does not exist
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html
+    ansible.builtin.file:
+      path: ~/git/polybar/build
+      state: directory
+      mode: '0755'
+    tags:
       - staging
+
+  - name: Compile polybar
+    ansible.builtin.command: /usr/bin/cmake ..
+    args:
+      chdir: ~/git/polybar/built
+    tags:
+      - staging
+
