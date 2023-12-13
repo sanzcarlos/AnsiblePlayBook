@@ -189,13 +189,15 @@
       path: ~/git/polybar/build
       state: directory
       mode: '0755'
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - staging
 
   - name: Compile polybar
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
     ansible.builtin.command: /usr/bin/cmake ..
     args:
       chdir: ~/git/polybar/built
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - staging
-
