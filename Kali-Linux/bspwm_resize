@@ -1,6 +1,6 @@
 #!/usr/bin/env dash
 
-#https://hack4u.io/wp-content/uploads/2022/09/bspwm_resize.txt
+# https://hack4u.io/wp-content/uploads/2022/09/bspwm_resize.txt
 
 if bspc query -N -n focused.floating > /dev/null; then
     step=20

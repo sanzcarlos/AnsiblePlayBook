@@ -7,6 +7,7 @@
     private: no
     default: user
   # https://pastebin.com/EEX1Dsuq
+  # https://hack4u.io/wp-content/uploads/2022/09/bspwm_resize.txt
 
   tasks:
 
@@ -108,8 +109,9 @@
       mode: "{{ item.mode }}"
       state: directory
     with_items:
-      - { path: ~/.config/bspwm,    mode: '0755'}
-      - { path: ~/.config/sxhkd,    mode: '0755'}
+      - { path: ~/.config/bspwm,             mode: '0755'}
+      - { path: ~/.config/bspwm/scripts/,    mode: '0755'}
+      - { path: ~/.config/sxhkd,             mode: '0755'}
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - production
@@ -121,8 +123,9 @@
       dest: "{{ item.dest }}"
       mode: "{{ item.mode }}"
     with_items:
-      - { src: bspwmrc, dest: ~/.config/bspwm/, mode: '0755' }
-      - { src: sxhkdrc, dest: ~/.config/sxhkd/, mode: '0644' }
+      - { src: bspwmrc,      dest: ~/.config/bspwm/,         mode: '0755' }
+      - { src: sxhkdrc,      dest: ~/.config/sxhkd/,         mode: '0644' }
+      - { src: bspwm_resize, dest: ~/.config/bspwm/scripts/, mode: '0755' }
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - staging
@@ -166,6 +169,16 @@
         - libmpdclient-dev
         - libuv1-dev
         - libnl-genl-3-dev
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - staging
+
+  - name: Clone git repositorie (hhttps://github.com/polybar/polybar)
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
+    ansible.builtin.git:
+      repo: https://github.com/polybar/polybar
+      clone: yes
+      dest:  ~/git/polybar
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - staging
