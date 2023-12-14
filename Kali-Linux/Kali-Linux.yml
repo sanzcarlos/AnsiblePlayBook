@@ -1,6 +1,6 @@
 ---
 - name: Kali Linux - s4vitar
-  hosts: 192.168.1.120
+  hosts: kali-linux
   vars_prompt:
   - name: "user_tmp"
     prompt: "¿Cual es el username?"
@@ -8,6 +8,9 @@
     default: user
   # https://pastebin.com/EEX1Dsuq
   # https://hack4u.io/wp-content/uploads/2022/09/bspwm_resize.txt
+  # https://hack4u.io/wp-content/uploads/2022/09/kitty.conf_.txt
+  # https://hack4u.io/wp-content/uploads/2022/09/color.ini_.txt
+  # https://hack4u.io/wp-content/uploads/2022/09/fondo.png
 
   tasks:
 
@@ -43,6 +46,9 @@
         - libxinerama1
         - libxinerama-dev
         - kitty
+        - feh
+        - imagemagick
+        - scrub
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - production
@@ -112,9 +118,11 @@
       - { path: ~/.config/bspwm,             mode: '0755'}
       - { path: ~/.config/bspwm/scripts/,    mode: '0755'}
       - { path: ~/.config/sxhkd,             mode: '0755'}
+      - { path: ~/.config/polybar,           mode: '0755'}
+      - { path: ~/.config/picom,             mode: '0755'}
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
-      - production
+      - staging
 
   - name: Copy config file for BSPWM & SXHKD
     # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
@@ -126,9 +134,13 @@
       - { src: bspwmrc,      dest: ~/.config/bspwm/,         mode: '0755' }
       - { src: sxhkdrc,      dest: ~/.config/sxhkd/,         mode: '0644' }
       - { src: bspwm_resize, dest: ~/.config/bspwm/scripts/, mode: '0755' }
+      - { src: kitty.conf,   dest: ~/.config/kitty/,         mode: '0644' }
+      - { src: color.ini,    dest: ~/.config/kitty/,         mode: '0644' }
+      - { src: fondo.png,    dest: ~/git/,                   mode: '0644' }
+      - { src: picom.conf,   dest: ~/.config/picom/,         mode: '0644' }
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
-      - production
+      - staging
 
   - name: Change file ownership and group
     become: yes
@@ -191,13 +203,168 @@
       mode: '0755'
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
-      - staging
+      - production
 
   - name: Compile polybar
     # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
     ansible.builtin.command: /usr/bin/cmake ..
     args:
-      chdir: ~/git/polybar/built
+      chdir: ~/git/polybar/build
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
-      - staging
+      - production
+
+  - name: Install Polybar from source
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/community/general/make_module.html
+    community.general.make:
+      chdir:  /home/{{user_tmp}}/git/polybar/build
+      target: install
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Update Server (apt update && apt dist-upgrade && apt autoclean && apt autoemove)
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    ansible.builtin.apt:
+      update_cache: yes
+      upgrade: dist
+      autoclean: yes
+      autoremove: yes
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Install Software
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    ansible.builtin.apt:
+      pkg:
+        - meson
+        - libxext-dev
+        - libxcb1-dev
+        - libxcb-damage0-dev
+        - libxcb-xfixes0-dev
+        - libxcb-shape0-dev
+        - libxcb-render-util0-dev
+        - libxcb-render0-dev
+        - libxcb-composite0-dev
+        - libxcb-image0-dev
+        - libxcb-present-dev
+        - libxcb-xinerama0-dev
+        - libpixman-1-dev
+        - libdbus-1-dev
+        - libconfig-dev
+        - libgl1-mesa-dev
+        - libpcre2-dev
+        - libpcre3-dev
+        - libevdev-dev
+        - uthash-dev
+        - libev-dev
+        - libx11-xcb-dev
+        - libxcb-glx0-dev
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Clone git repositorie (https://github.com/ibhagwan/picom.git)
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
+    ansible.builtin.git:
+      repo: https://github.com/ibhagwan/picom.git
+      clone: yes
+      dest:  ~/git/picom
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: picom - git submodule update --init --recursive
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+    ansible.builtin.command: git submodule update --init --recursive
+    args:
+      chdir: ~/git/picom
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: picom - meson --buildtype=release . build
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+    ansible.builtin.command: meson --buildtype=release . build
+    args:
+      chdir: ~/git/picom
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: picom - ninja -C build
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+    ansible.builtin.command: ninja -C build
+    args:
+      chdir: ~/git/picom
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: picom - ninja -C build install
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+    become: yes
+    ansible.builtin.command: ninja -C build install
+    args:
+      chdir: /home/{{user_tmp}}/git/picom
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Install rofi
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    ansible.builtin.apt:
+      pkg:
+        - rofi
+        - bspwm
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Download and Install https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
+    become: yes
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/unarchive_module.html
+    ansible.builtin.unarchive:
+      src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
+      dest: /usr/local/share/fonts/
+      remote_src: yes
+    tags:
+      - production
+
+  - name: Update Fonts
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+    become: yes
+    ansible.builtin.command: fc-cache -v
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Clone git repositorie (https://github.com/VaughnValle/blue-sky.git)
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
+    ansible.builtin.git:
+      repo: https://github.com/VaughnValle/blue-sky.git
+      clone: yes
+      dest:  ~/git/blue-sky
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Copy config file for polybar
+    ansible.builtin.command: cp ~/git/blue-sky/polybar -r ~/.config
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+
+  - name: Update Fonts
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+    become: yes
+    ansible.builtin.command: fc-cache -v
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
+    tags:
+      - production
+

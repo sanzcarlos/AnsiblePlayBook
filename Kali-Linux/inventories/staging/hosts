@@ -10,7 +10,8 @@ test_raspberrypi:
 
 Kali:
   hosts:
-    192.168.1.120:
+    kali-linux:
+      ansible_host: 192.168.1.111
       ansible_port: 65323
       ansible_user: csanz
       ansible_ssh_pass: frnpsfpx
