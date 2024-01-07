@@ -25,6 +25,7 @@
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - production
+      - update
 
   - name: Install Software
     become: yes
@@ -49,9 +50,18 @@
         - feh
         - imagemagick
         - scrub
+        - slim
+        - libpam0g-dev
+        - libxrandr-dev
+        - libfreetype6-dev
+        - libimlib2-dev
+        - libxft-dev
+        - i3
+        - i3exit
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
       - production
+      - staging
 
   - name: Clone git repositorie (https://github.com/baskerville/bspwm)
     # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
@@ -120,8 +130,11 @@
       - { path: ~/.config/sxhkd,             mode: '0755'}
       - { path: ~/.config/polybar,           mode: '0755'}
       - { path: ~/.config/picom,             mode: '0755'}
+      - { path: ~/.config/bin,               mode: '0755'}
+      - { path: ~/.config/i3,                mode: '0755'}
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
+      - production
       - staging
 
   - name: Copy config file for BSPWM & SXHKD
@@ -138,8 +151,10 @@
       - { src: color.ini,    dest: ~/.config/kitty/,         mode: '0644' }
       - { src: fondo.png,    dest: ~/git/,                   mode: '0644' }
       - { src: picom.conf,   dest: ~/.config/picom/,         mode: '0644' }
+      - { src: config,       dest: ~/.config/i3/config.conf, mode: '0644' }
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html
     tags:
+      - production
       - staging
 
   - name: Change file ownership and group
