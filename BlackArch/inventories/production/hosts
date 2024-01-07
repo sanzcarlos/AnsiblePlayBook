@@ -1,0 +1,8 @@
+raspberrypi:
+  hosts:
+    gandalf:
+      ansible_host: 192.168.1.30
+      ansible_port: 65323
+    frodo:
+      ansible_host: 192.168.1.31
+      ansible_port: 65323
